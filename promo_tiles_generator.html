@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Accessibility Tool - Promo Tiles Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+        .tile-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        canvas {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .download-btn {
+            background: #4f46e5;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 10px 10px 0;
+        }
+        .download-btn:hover {
+            background: #3730a3;
+        }
+        h2 {
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        .specs {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        .preview {
+            margin: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Deep Accessibility Tool - Chrome Store Promo Tiles</h1>
+        
+        <!-- Small Promo Tile -->
+        <div class="tile-section">
+            <h2>Small Promo Tile</h2>
+            <div class="specs">440 x 280 pixels - Used in search results and category pages</div>
+            <div class="preview">
+                <canvas id="smallTile" width="440" height="280"></canvas>
+                <br>
+                <button class="download-btn" onclick="downloadCanvas('smallTile', 'deep-accessibility-small-promo-440x280.png')">
+                    📥 Download Small Promo Tile
+                </button>
+            </div>
+        </div>
+
+        <!-- Marquee Promo Tile -->
+        <div class="tile-section">
+            <h2>Marquee Promo Tile</h2>
+            <div class="specs">1400 x 560 pixels - Used for featured promotions and banner displays</div>
+            <div class="preview">
+                <canvas id="marqueeTile" width="1400" height="560"></canvas>
+                <br>
+                <button class="download-btn" onclick="downloadCanvas('marqueeTile', 'deep-accessibility-marquee-promo-1400x560.png')">
+                    📥 Download Marquee Promo Tile
+                </button>
+            </div>
+        </div>
+
+        <!-- Generate Button -->
+        <div class="tile-section">
+            <button class="download-btn" onclick="generateAllTiles()" style="background: #059669; font-size: 18px; padding: 15px 30px;">
+                🚀 Generate All Tiles
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let iconImage = null;
+        
+        function loadIcon() {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    iconImage = img;
+                    resolve(img);
+                };
+                img.onerror = () => {
+                    console.log('Could not load icon128.png, using fallback');
+                    resolve(null);
+                };
+                img.src = 'icons/icon128.png';
+            });
+        }
+        
+        function generateAllTiles() {
+            loadIcon().then(() => {
+                createSmallTile();
+                createMarqueeTile();
+            });
+        }
+
+        function createSmallTile() {
+            const canvas = document.getElementById('smallTile');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#4f46e5');
+            gradient.addColorStop(0.5, '#7c3aed');
+            gradient.addColorStop(1, '#3730a3');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Add subtle pattern
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            for (let i = 0; i < canvas.width; i += 40) {
+                for (let j = 0; j < canvas.height; j += 40) {
+                    ctx.fillRect(i, j, 20, 20);
+                }
+            }
+            
+            // Main title
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 32px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Deep Accessibility Tool', canvas.width / 2, 60);
+            
+            // Subtitle
+            ctx.font = '16px Arial';
+            ctx.fillText('Transform any website for better accessibility', canvas.width / 2, 90);
+            
+            // Features list
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'left';
+            const features = [
+                '📝 Text Size Control',
+                '🎨 Visual Adjustments',
+                '🌙 Dark Mode',
+                '♿ Disability Support'
+            ];
+            
+            features.forEach((feature, index) => {
+                ctx.fillText(feature, 40, 130 + (index * 25));
+            });
+            
+            // Use actual icon or fallback
+            if (iconImage) {
+                // Draw the actual icon128.png scaled to 64x64
+                ctx.drawImage(iconImage, canvas.width - 104, canvas.height - 104, 64, 64);
+            } else {
+                // Fallback accessibility icon
+                ctx.font = '60px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('♿', canvas.width - 80, canvas.height - 60);
+            }
+            
+            // Chrome Web Store badge
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fillRect(canvas.width - 120, 20, 100, 30);
+            ctx.fillStyle = '#4f46e5';
+            ctx.font = 'bold 12px Arial';
+            ctx.fillText('Chrome Store', canvas.width - 70, 40);
+        }
+
+        function createMarqueeTile() {
+            const canvas = document.getElementById('marqueeTile');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#1e1b4b');
+            gradient.addColorStop(0.3, '#4f46e5');
+            gradient.addColorStop(0.7, '#7c3aed');
+            gradient.addColorStop(1, '#581c87');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Add geometric pattern
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+            for (let i = 0; i < canvas.width; i += 100) {
+                for (let j = 0; j < canvas.height; j += 100) {
+                    ctx.fillRect(i, j, 50, 50);
+                }
+            }
+            
+            // Left side - Text content
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 48px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Deep Accessibility Tool', 60, 100);
+            
+            ctx.font = '24px Arial';
+            ctx.fillText('Make the web accessible for everyone', 60, 140);
+            
+            // Feature highlights
+            ctx.font = '20px Arial';
+            const features = [
+                '♿ Designed for people with disabilities',
+                '👁️ Visual impairments & low vision support',
+                '🧠 Cognitive disabilities assistance',
+                '🎯 15 levels of text size adjustment',
+                '🌙 Dark mode for light sensitivity',
+                '🔗 Enhanced navigation for motor disabilities'
+            ];
+            
+            features.forEach((feature, index) => {
+                ctx.fillText(feature, 60, 200 + (index * 35));
+            });
+            
+            // Right side - Visual demonstration
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.fillRect(canvas.width - 500, 80, 400, 300);
+            
+            // Mock browser window
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fillRect(canvas.width - 480, 100, 360, 260);
+            
+            // Extension popup mockup
+            ctx.fillStyle = '#4f46e5';
+            ctx.fillRect(canvas.width - 460, 120, 320, 220);
+            
+            // Use actual icon in popup header
+            if (iconImage) {
+                ctx.drawImage(iconImage, canvas.width - 440, 130, 32, 32);
+            }
+            
+            // Popup content
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('🌐 Accessibility Tools', canvas.width - 300, 150);
+            
+            // Feature buttons
+            const buttons = ['📝 Text Size', '🎨 Contrast', '🌙 Dark Mode', '♿ Reset'];
+            buttons.forEach((btn, index) => {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.fillRect(canvas.width - 440, 170 + (index * 35), 280, 25);
+                ctx.fillStyle = 'white';
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(btn, canvas.width - 300, 187 + (index * 35));
+            });
+            
+            // Large icon or fallback
+            if (iconImage) {
+                // Draw the actual icon128.png scaled to 120x120
+                ctx.drawImage(iconImage, canvas.width - 180, canvas.height - 180, 120, 120);
+            } else {
+                // Fallback accessibility icon
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.font = '120px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('♿', canvas.width - 120, canvas.height - 60);
+            }
+            
+            // Rating stars
+            ctx.fillStyle = '#fbbf24';
+            ctx.font = '24px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('★★★★★', 60, canvas.height - 40);
+            ctx.fillStyle = 'white';
+            ctx.font = '16px Arial';
+            ctx.fillText('Trusted by disability communities', 200, canvas.height - 40);
+        }
+
+        function downloadCanvas(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Generate tiles on page load
+        window.onload = function() {
+            generateAllTiles();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+/* Accessibility CSS - Additional styles for better accessibility */
+
+/* High contrast mode fallback */
+.accessibility-high-contrast {
+    background-color: black !important;
+    color: white !important;
+}
+
+.accessibility-high-contrast a {
+    color: yellow !important;
+}
+
+/* Light background mode */
+.accessibility-light-background {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+/* Dark mode styles */
+.accessibility-dark-mode {
+    background-color: #1a1a1a !important;
+    color: #e0e0e0 !important;
+}
+
+.accessibility-dark-mode a {
+    color: #64b5f6 !important;
+}
+
+.accessibility-dark-mode a:hover {
+    color: #90caf9 !important;
+}
+
+.accessibility-dark-mode input,
+.accessibility-dark-mode textarea,
+.accessibility-dark-mode select,
+.accessibility-dark-mode button {
+    background-color: #404040 !important;
+    color: #e0e0e0 !important;
+    border-color: #606060 !important;
+}
+
+.accessibility-dark-mode h1,
+.accessibility-dark-mode h2,
+.accessibility-dark-mode h3,
+.accessibility-dark-mode h4,
+.accessibility-dark-mode h5,
+.accessibility-dark-mode h6 {
+    color: #ffffff !important;
+}
+
+/* Readable font styles */
+.accessibility-readable-font {
+    font-family: "Arial", "Helvetica", "Open Sans", sans-serif !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* Link underline styles */
+.accessibility-links-underline a {
+    text-decoration: underline !important;
+    text-decoration-thickness: 2px !important;
+}
+
+/* Focus indicators for better keyboard navigation */
+*:focus {
+    outline: 3px solid #4f46e5 !important;
+    outline-offset: 2px !important;
+}
+
+/* Skip link for screen readers */
+.accessibility-skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: #000;
+    color: #fff;
+    padding: 8px;
+    text-decoration: none;
+    z-index: 100000;
+}
+
+.accessibility-skip-link:focus {
+    top: 6px;
+}
+
+/* Improved button accessibility */
+button:focus,
+input[type="button"]:focus,
+input[type="submit"]:focus {
+    outline: 3px solid #4f46e5 !important;
+    outline-offset: 2px !important;
+}
+
+/* Better form field visibility */
+input, textarea, select {
+    border: 2px solid #ccc !important;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: #4f46e5 !important;
+}
+
+/* Ensure images have proper contrast */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Text selection styling */
+::selection {
+    background-color: #4f46e5;
+    color: white;
+}
+
+::-moz-selection {
+    background-color: #4f46e5;
+    color: white;
+}
+
+/* Improved theme switching */
+.accessibility-theme-transition * {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+}
+
+/* Prevent text overlapping when text size is increased */
+.accessibility-text-size-applied {
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+    hyphens: auto !important;
+}
+
+/* Ensure proper spacing for common layout elements */
+.accessibility-text-size-applied p + p,
+.accessibility-text-size-applied div + div,
+.accessibility-text-size-applied li + li {
+    margin-top: 0.3em !important;
+}
+
+/* Fix for sticky/fixed elements that might overlap */
+.accessibility-text-size-applied nav,
+.accessibility-text-size-applied header,
+.accessibility-text-size-applied footer {
+    position: relative !important;
+    z-index: 1000 !important;
+}
+
+/* Prevent overflow in containers */
+.accessibility-text-size-applied * {
+    box-sizing: border-box !important;
+}
+
+/* Improve flex and grid layouts */
+.accessibility-text-size-applied [style*="display: flex"],
+.accessibility-text-size-applied [style*="display: grid"] {
+    gap: 0.5em !important;
+}
