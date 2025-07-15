@@ -11,10 +11,10 @@
     <div class="container">
         <header class="header">
             <h1><i class="fas fa-universal-access"></i> Deep Accessibility Tool</h1>
-            <p>Click on icons to apply accessibility effects to any website</p>
+            <p>Enter any website URL and apply accessibility effects directly</p>
             <div class="target-url-section">
                 <input type="url" id="targetUrl" placeholder="Enter website URL (e.g., https://example.com)" value="https://example.com">
-                <button id="applyToUrl" class="btn-primary">Apply to Website</button>
+                <button id="loadWebsite" class="btn-primary">Load Website</button>
             </div>
         </header>
 
@@ -124,12 +124,19 @@
             </div>
         </div>
 
-        <!-- Demo Preview Section -->
-        <div class="demo-section">
-            <h2><i class="fas fa-desktop"></i> Live Preview</h2>
-            <p>See how the effects will look on your website:</p>
-            <div class="demo-preview">
-                <iframe id="previewFrame" src="demo.html" width="100%" height="500"></iframe>
+        <!-- Website Display Section -->
+        <div class="website-section">
+            <h2><i class="fas fa-globe"></i> Website Display</h2>
+            <div class="website-controls">
+                <button id="refreshWebsite" class="btn-secondary">
+                    <i class="fas fa-sync"></i> Refresh
+                </button>
+                <button id="openInNewTab" class="btn-secondary">
+                    <i class="fas fa-external-link-alt"></i> Open in New Tab
+                </button>
+            </div>
+            <div class="website-display">
+                <iframe id="websiteFrame" src="demo.html" width="100%" height="600"></iframe>
             </div>
         </div>
 
@@ -137,28 +144,40 @@
         <div class="status-bar">
             <div class="status-item">
                 <i class="fas fa-circle" id="statusIcon"></i>
-                <span id="statusText">Ready to apply accessibility effects</span>
+                <span id="statusText">Ready to load website and apply accessibility effects</span>
             </div>
             <div class="active-features">
-                <span>Active: </span>
+                <span>Active Effects: </span>
                 <span id="activeFeaturesList">None</span>
+            </div>
+            <div class="current-url">
+                <span>Current URL: </span>
+                <span id="currentUrlDisplay">demo.html</span>
             </div>
         </div>
     </div>
 
-    <!-- Modal for extension integration -->
-    <div id="extensionModal" class="modal">
+    <!-- Modal for CORS information -->
+    <div id="corsModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2>Extension Integration</h2>
-            <p>To use this web interface with your browser extension:</p>
-            <ol>
-                <li>Install the Deep Accessibility Tool Chrome extension</li>
-                <li>Visit any website you want to make accessible</li>
-                <li>Click on the accessibility effects you want to apply</li>
-                <li>The extension will automatically apply these effects</li>
-            </ol>
-            <button id="installExtension" class="btn-primary">Install Extension</button>
+            <h2>Website Loading Information</h2>
+            <p>Some websites may not load due to CORS (Cross-Origin Resource Sharing) policies. This is a security feature of web browsers.</p>
+            <h3>Websites that typically work:</h3>
+            <ul>
+                <li>Static websites and blogs</li>
+                <li>News websites</li>
+                <li>Documentation sites</li>
+                <li>Educational websites</li>
+            </ul>
+            <h3>Websites that may not work:</h3>
+            <ul>
+                <li>Social media platforms (Facebook, Twitter, etc.)</li>
+                <li>Banking websites</li>
+                <li>Sites with strict security policies</li>
+            </ul>
+            <p><strong>Tip:</strong> Try adding a CORS proxy like <code>https://cors-anywhere.herokuapp.com/</code> before the URL.</p>
+            <button id="closeCorsModal" class="btn-primary">Got it!</button>
         </div>
     </div>
 

@@ -11,6 +11,7 @@ chrome.runtime.onInstalled.addListener(() => {
                 highContrast: false,
                 negativeContrast: false,
                 lightBackground: false,
+                darkMode: false,
                 linksUnderline: false,
                 readableFont: false
             }
@@ -36,11 +37,40 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     }
 });
 
-// Handle messages from content script
+// Handle messages from content script and web interface
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'saveSettings') {
         chrome.storage.local.set({ accessibilitySettings: request.settings });
         sendResponse({ success: true });
+    }
+    
+    // Handle web interface communication
+    if (request.action === 'webInterfaceCommand') {
+        // Forward command to active tab
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs[0]) {
+                chrome.tabs.sendMessage(tabs[0].id, request.data);
+            }
+        });
+        sendResponse({ success: true });
+    }
+});
+
+// Enable communication with web interface
+chrome.runtime.onMessageExternal.addListener((request, sender, sendResponse) => {
+    // Only accept messages from localhost (web interface)
+    if (sender.url && sender.url.startsWith('http://localhost:')) {
+        // Forward to active tab
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs[0]) {
+                chrome.tabs.sendMessage(tabs[0].id, request, (response) => {
+                    sendResponse(response);
+                });
+            } else {
+                sendResponse({ error: 'No active tab' });
+            }
+        });
+        return true; // Will respond asynchronously
     }
 });
 
@@ -58,4 +88,18 @@ chrome.runtime.onInstalled.addListener(() => {
         title: 'Open Accessibility Tools',
         contexts: ['page']
     });
+    
+    // Create context menu for web interface
+    chrome.contextMenus.create({
+        id: 'openWebInterface',
+        title: 'Open Web Interface',
+        contexts: ['page']
+    });
+});
+
+// Handle web interface context menu
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+    if (info.menuItemId === 'openWebInterface') {
+        chrome.tabs.create({ url: 'http://localhost:3000' });
+    }
 });

@@ -14,6 +14,7 @@ class AccessibilityTool {
             readableFont: false
         };
         this.isInitialized = false;
+        this.webInterfacePort = 3000; // Default port for web interface
         this.init();
     }
 
@@ -22,6 +23,7 @@ class AccessibilityTool {
             this.createStyleElement();
             this.loadSavedSettings();
             this.addKeyboardSupport();
+            this.setupWebInterfaceListener();
             this.isInitialized = true;
             console.log('Deep Accessibility Tool v1.1.0 initialized successfully');
         } catch (error) {
@@ -106,6 +108,74 @@ class AccessibilityTool {
         }, 2000);
     }
 
+    // Add web interface communication
+    setupWebInterfaceListener() {
+        // Listen for messages from web interface
+        window.addEventListener('message', (event) => {
+            // Only accept messages from the web interface
+            if (event.origin !== `http://localhost:${this.webInterfacePort}`) {
+                return;
+            }
+
+            const { action, data } = event.data;
+            
+            switch (action) {
+                case 'toggleFeature':
+                    this.handleWebInterfaceToggle(data.feature, data.isActive);
+                    break;
+                case 'executeAction':
+                    this.executeAction(data.action);
+                    break;
+                case 'getStatus':
+                    this.sendStatusToWebInterface();
+                    break;
+                case 'reset':
+                    this.resetAll();
+                    break;
+            }
+        });
+
+        // Notify web interface when extension is ready
+        this.notifyWebInterface('extensionReady', {
+            textSizeLevel: this.textSizeLevel,
+            features: this.features
+        });
+    }
+
+    handleWebInterfaceToggle(feature, isActive) {
+        // Set feature state based on web interface
+        this.features[feature] = isActive;
+        
+        // Handle theme conflicts
+        if (feature === 'darkMode' && isActive && this.features.lightBackground) {
+            this.features.lightBackground = false;
+        }
+        if (feature === 'lightBackground' && isActive && this.features.darkMode) {
+            this.features.darkMode = false;
+        }
+
+        this.updateFeatureStyles();
+        this.saveSettings();
+        this.showNotification(`${feature} ${isActive ? 'enabled' : 'disabled'}`);
+    }
+
+    sendStatusToWebInterface() {
+        this.notifyWebInterface('statusUpdate', {
+            textSizeLevel: this.textSizeLevel,
+            features: this.features
+        });
+    }
+
+    notifyWebInterface(action, data) {
+        try {
+            // Send message to web interface
+            const message = { action, data };
+            window.postMessage(message, `http://localhost:${this.webInterfacePort}`);
+        } catch (error) {
+            console.log('Could not communicate with web interface:', error);
+        }
+    }
+
     executeAction(action) {
         switch (action) {
             case 'increaseText':
@@ -117,6 +187,12 @@ class AccessibilityTool {
             default:
                 console.log('Unknown action:', action);
         }
+        
+        // Notify web interface of action
+        this.notifyWebInterface('actionExecuted', {
+            action: action,
+            textSizeLevel: this.textSizeLevel
+        });
     }
 
     increaseTextSize() {
@@ -247,6 +323,13 @@ class AccessibilityTool {
         this.features[feature] = !this.features[feature];
         this.updateFeatureStyles();
         this.saveSettings();
+        
+        // Notify web interface of feature change
+        this.notifyWebInterface('featureToggled', {
+            feature: feature,
+            isActive: this.features[feature]
+        });
+        
         return this.features[feature];
     }
 
@@ -411,6 +494,12 @@ class AccessibilityTool {
 
         // Clear saved settings
         this.clearSavedSettings();
+        
+        // Notify web interface of reset
+        this.notifyWebInterface('resetCompleted', {
+            textSizeLevel: this.textSizeLevel,
+            features: this.features
+        });
     }
 
     saveSettings() {
