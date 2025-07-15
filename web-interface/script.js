@@ -4,14 +4,16 @@ class AccessibilityWebInterface {
         this.textSizeLevel = 0;
         this.maxTextSize = 10;
         this.minTextSize = -5;
-        this.extensionId = 'your-extension-id-here'; // Replace with actual extension ID
+        this.currentUrl = 'demo.html';
+        this.websiteFrame = null;
         this.init();
     }
 
     init() {
         this.setupEventListeners();
-        this.updateStatus('Ready to apply accessibility effects');
-        this.checkExtensionAvailability();
+        this.websiteFrame = document.getElementById('websiteFrame');
+        this.updateStatus('Ready to load website and apply accessibility effects');
+        this.updateCurrentUrl(this.currentUrl);
     }
 
     setupEventListeners() {
@@ -31,21 +33,45 @@ class AccessibilityWebInterface {
             });
         });
 
-        // Apply to URL button
-        document.getElementById('applyToUrl').addEventListener('click', () => {
-            this.applyToUrl();
+        // Load website button
+        document.getElementById('loadWebsite').addEventListener('click', () => {
+            this.loadWebsite();
+        });
+
+        // Website controls
+        document.getElementById('refreshWebsite').addEventListener('click', () => {
+            this.refreshWebsite();
+        });
+
+        document.getElementById('openInNewTab').addEventListener('click', () => {
+            this.openInNewTab();
+        });
+
+        // URL input Enter key
+        document.getElementById('targetUrl').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.loadWebsite();
+            }
         });
 
         // Modal controls
         document.querySelector('.close').addEventListener('click', () => {
-            document.getElementById('extensionModal').style.display = 'none';
+            document.getElementById('corsModal').style.display = 'none';
         });
 
-        document.getElementById('installExtension').addEventListener('click', () => {
-            this.showExtensionInstallInfo();
+        document.getElementById('closeCorsModal').addEventListener('click', () => {
+            document.getElementById('corsModal').style.display = 'none';
         });
 
-        // Keyboard support
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('corsModal');
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey && e.altKey) {
                 switch (e.key) {
@@ -70,9 +96,76 @@ class AccessibilityWebInterface {
                         e.preventDefault();
                         this.executeAction('decreaseText');
                         break;
+                    case 'l':
+                        e.preventDefault();
+                        this.loadWebsite();
+                        break;
                 }
             }
         });
+
+        // Listen for iframe load events
+        this.websiteFrame.addEventListener('load', () => {
+            this.onWebsiteLoad();
+        });
+    }
+
+    loadWebsite() {
+        const url = document.getElementById('targetUrl').value.trim();
+        if (!url) {
+            this.updateStatus('Please enter a valid URL', 'error');
+            return;
+        }
+
+        // Add protocol if missing
+        let finalUrl = url;
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            finalUrl = 'https://' + url;
+        }
+
+        this.updateStatus('Loading website...', 'loading');
+        this.currentUrl = finalUrl;
+        this.updateCurrentUrl(finalUrl);
+
+        // Try to load the website
+        try {
+            this.websiteFrame.src = finalUrl;
+        } catch (error) {
+            this.updateStatus('Error loading website: ' + error.message, 'error');
+            this.showCorsModal();
+        }
+    }
+
+    refreshWebsite() {
+        if (this.websiteFrame && this.websiteFrame.src) {
+            this.updateStatus('Refreshing website...', 'loading');
+            this.websiteFrame.src = this.websiteFrame.src;
+        }
+    }
+
+    openInNewTab() {
+        if (this.currentUrl && this.currentUrl !== 'demo.html') {
+            window.open(this.currentUrl, '_blank');
+        }
+    }
+
+    onWebsiteLoad() {
+        try {
+            // Check if we can access the iframe content
+            const iframeDoc = this.websiteFrame.contentDocument || this.websiteFrame.contentWindow.document;
+            
+            if (iframeDoc) {
+                this.updateStatus('Website loaded successfully');
+                // Apply current accessibility settings to the loaded website
+                setTimeout(() => {
+                    this.applyAllEffects();
+                }, 500);
+            }
+        } catch (error) {
+            // CORS error - website loaded but we can't access it
+            this.updateStatus('Website loaded (limited access due to CORS)', 'warning');
+            this.showCorsModal();
+        }
     }
 
     toggleFeature(feature, element) {
@@ -99,8 +192,7 @@ class AccessibilityWebInterface {
         this.updateFeatureButton(feature, !isActive);
         this.updateActiveFeaturesList();
         this.updateStatus(`${feature} ${!isActive ? 'enabled' : 'disabled'}`);
-        this.applyToPreview();
-        this.sendToExtension('toggleFeature', { feature, isActive: !isActive });
+        this.applyAllEffects();
     }
 
     executeAction(action, element) {
@@ -113,16 +205,14 @@ class AccessibilityWebInterface {
                 if (this.textSizeLevel < this.maxTextSize) {
                     this.textSizeLevel++;
                     this.updateStatus(`Text size increased: ${this.getTextSizeDescription()}`);
-                    this.applyToPreview();
-                    this.sendToExtension('executeAction', { action: 'increaseText' });
+                    this.applyAllEffects();
                 }
                 break;
             case 'decreaseText':
                 if (this.textSizeLevel > this.minTextSize) {
                     this.textSizeLevel--;
                     this.updateStatus(`Text size decreased: ${this.getTextSizeDescription()}`);
-                    this.applyToPreview();
-                    this.sendToExtension('executeAction', { action: 'decreaseText' });
+                    this.applyAllEffects();
                 }
                 break;
             case 'reset':
@@ -142,59 +232,18 @@ class AccessibilityWebInterface {
 
         this.updateActiveFeaturesList();
         this.updateStatus('All settings reset successfully');
-        this.applyToPreview();
-        this.sendToExtension('executeAction', { action: 'reset' });
+        this.applyAllEffects();
     }
 
-    updateFeatureButton(feature, isActive) {
-        const button = document.querySelector(`[data-feature="${feature}"]`);
-        if (button) {
-            button.classList.toggle('active', isActive);
-        }
-    }
-
-    updateActiveFeaturesList() {
-        const activeList = document.getElementById('activeFeaturesList');
-        if (this.activeFeatures.size === 0) {
-            activeList.textContent = 'None';
-        } else {
-            activeList.textContent = Array.from(this.activeFeatures).join(', ');
-        }
-    }
-
-    updateStatus(message, type = 'success') {
-        const statusText = document.getElementById('statusText');
-        const statusIcon = document.getElementById('statusIcon');
-        
-        statusText.textContent = message;
-        
-        // Update icon color based on type
-        statusIcon.style.color = type === 'error' ? '#ef4444' : '#10b981';
-        
-        // Reset status after 3 seconds
-        setTimeout(() => {
-            statusText.textContent = 'Ready to apply accessibility effects';
-            statusIcon.style.color = '#10b981';
-        }, 3000);
-    }
-
-    getTextSizeDescription() {
-        if (this.textSizeLevel === 0) return 'Normal';
-        if (this.textSizeLevel > 0) return `+${this.textSizeLevel * 5}%`;
-        return `${this.textSizeLevel * 5}%`;
-    }
-
-    addClickAnimation(element) {
-        element.classList.add('clicked');
-        setTimeout(() => {
-            element.classList.remove('clicked');
-        }, 300);
-    }
-
-    applyToPreview() {
-        const iframe = document.getElementById('previewFrame');
-        if (iframe && iframe.contentDocument) {
-            this.applyEffectsToDocument(iframe.contentDocument);
+    applyAllEffects() {
+        try {
+            const iframeDoc = this.websiteFrame.contentDocument || this.websiteFrame.contentWindow.document;
+            if (iframeDoc) {
+                this.applyEffectsToDocument(iframeDoc);
+            }
+        } catch (error) {
+            // Can't access iframe content due to CORS
+            console.log('Cannot apply effects due to CORS restrictions');
         }
     }
 
@@ -221,6 +270,22 @@ class AccessibilityWebInterface {
             }
             p, div, span, li, td, th {
                 line-height: ${Math.max(1.5, scale * 1.4)} !important;
+                margin-bottom: ${scale * 0.5}em !important;
+            }
+            h1, h2, h3, h4, h5, h6 {
+                line-height: ${Math.max(1.3, scale * 1.2)} !important;
+                margin-top: ${scale * 0.8}em !important;
+                margin-bottom: ${scale * 0.5}em !important;
+            }
+            input, textarea, select {
+                font-size: ${scale * 0.9}em !important;
+                line-height: ${Math.max(1.3, scale * 1.2)} !important;
+                padding: ${scale * 0.4}em !important;
+            }
+            button {
+                font-size: ${scale}em !important;
+                line-height: ${Math.max(1.2, scale * 1.1)} !important;
+                padding: ${scale * 0.5}em ${scale * 0.8}em !important;
             }
         `;
         this.addStyleToDocument(doc, 'accessibility-textSize', css);
@@ -241,13 +306,14 @@ class AccessibilityWebInterface {
                     border-color: white !important;
                 }
                 a, a:visited { color: yellow !important; }
+                img { filter: contrast(200%) !important; }
             `;
         }
 
         if (this.activeFeatures.has('negativeContrast')) {
             css += `
                 html { filter: invert(1) hue-rotate(180deg) !important; }
-                img, video { filter: invert(1) hue-rotate(180deg) !important; }
+                img, video, iframe, svg { filter: invert(1) hue-rotate(180deg) !important; }
             `;
         }
 
@@ -266,9 +332,30 @@ class AccessibilityWebInterface {
                 * {
                     background-color: #1a1a1a !important;
                     color: #e0e0e0 !important;
+                    border-color: #404040 !important;
                 }
                 body { background-color: #1a1a1a !important; }
+                div, section, article, main, header, footer, nav {
+                    background-color: #2d2d2d !important;
+                }
+                input, textarea, select, button {
+                    background-color: #404040 !important;
+                    color: #e0e0e0 !important;
+                    border-color: #606060 !important;
+                }
                 a, a:visited { color: #64b5f6 !important; }
+                a:hover { color: #90caf9 !important; }
+                h1, h2, h3, h4, h5, h6 { color: #ffffff !important; }
+                code, pre {
+                    background-color: #333333 !important;
+                    color: #f0f0f0 !important;
+                }
+                table { background-color: #2d2d2d !important; }
+                th, td {
+                    border-color: #505050 !important;
+                    background-color: #353535 !important;
+                }
+                img { opacity: 0.9; filter: brightness(0.9); }
             `;
         }
 
@@ -284,8 +371,12 @@ class AccessibilityWebInterface {
         if (this.activeFeatures.has('readableFont')) {
             css += `
                 * {
-                    font-family: "Arial", "Helvetica", sans-serif !important;
+                    font-family: "Arial", "Helvetica", "Open Sans", sans-serif !important;
+                    font-weight: 400 !important;
                     letter-spacing: 0.5px !important;
+                }
+                h1, h2, h3, h4, h5, h6 {
+                    font-weight: 600 !important;
                 }
             `;
         }
@@ -302,81 +393,76 @@ class AccessibilityWebInterface {
         doc.head.appendChild(style);
     }
 
-    applyToUrl() {
-        const url = document.getElementById('targetUrl').value;
-        if (!url) {
-            this.updateStatus('Please enter a valid URL', 'error');
-            return;
+    updateFeatureButton(feature, isActive) {
+        const button = document.querySelector(`[data-feature="${feature}"]`);
+        if (button) {
+            button.classList.toggle('active', isActive);
         }
+    }
 
-        // For now, just update the preview iframe
-        const iframe = document.getElementById('previewFrame');
-        iframe.src = url;
+    updateActiveFeaturesList() {
+        const activeList = document.getElementById('activeFeaturesList');
+        if (this.activeFeatures.size === 0) {
+            activeList.textContent = 'None';
+        } else {
+            activeList.textContent = Array.from(this.activeFeatures).join(', ');
+        }
+    }
+
+    updateCurrentUrl(url) {
+        const currentUrlDisplay = document.getElementById('currentUrlDisplay');
+        currentUrlDisplay.textContent = url;
+    }
+
+    updateStatus(message, type = 'success') {
+        const statusText = document.getElementById('statusText');
+        const statusIcon = document.getElementById('statusIcon');
         
-        iframe.onload = () => {
-            setTimeout(() => {
-                this.applyToPreview();
-            }, 1000);
-        };
-
-        this.updateStatus(`Applying effects to ${url}`);
-    }
-
-    sendToExtension(action, data) {
-        // Try to communicate with the extension
-        if (typeof chrome !== 'undefined' && chrome.runtime) {
-            chrome.runtime.sendMessage(this.extensionId, {
-                action: action,
-                data: data
-            }, (response) => {
-                if (chrome.runtime.lastError) {
-                    console.log('Extension communication failed:', chrome.runtime.lastError.message);
-                }
-            });
-        }
-    }
-
-    checkExtensionAvailability() {
-        // Check if extension is available
-        if (typeof chrome === 'undefined' || !chrome.runtime) {
-            // Show modal for extension installation
-            setTimeout(() => {
-                document.getElementById('extensionModal').style.display = 'block';
-            }, 2000);
-        }
-    }
-
-    showExtensionInstallInfo() {
-        const modal = document.getElementById('extensionModal');
-        modal.style.display = 'none';
+        statusText.textContent = message;
         
-        // Create a new window or tab for extension installation
-        const installUrl = 'chrome://extensions/';
-        window.open(installUrl, '_blank');
+        // Update icon color based on type
+        switch (type) {
+            case 'error':
+                statusIcon.style.color = '#ef4444';
+                break;
+            case 'warning':
+                statusIcon.style.color = '#f59e0b';
+                break;
+            case 'loading':
+                statusIcon.style.color = '#3b82f6';
+                break;
+            default:
+                statusIcon.style.color = '#10b981';
+        }
+        
+        // Reset status after 3 seconds (except for loading)
+        if (type !== 'loading') {
+            setTimeout(() => {
+                statusText.textContent = 'Ready to load website and apply accessibility effects';
+                statusIcon.style.color = '#10b981';
+            }, 3000);
+        }
+    }
+
+    getTextSizeDescription() {
+        if (this.textSizeLevel === 0) return 'Normal';
+        if (this.textSizeLevel > 0) return `+${this.textSizeLevel * 5}%`;
+        return `${this.textSizeLevel * 5}%`;
+    }
+
+    addClickAnimation(element) {
+        element.classList.add('clicked');
+        setTimeout(() => {
+            element.classList.remove('clicked');
+        }, 300);
+    }
+
+    showCorsModal() {
+        document.getElementById('corsModal').style.display = 'block';
     }
 }
 
 // Initialize the web interface when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    new AccessibilityWebInterface();
-});
-
-// Preview frame setup
-document.addEventListener('DOMContentLoaded', () => {
-    const iframe = document.getElementById('previewFrame');
-    
-    iframe.onload = () => {
-        // Apply current settings to the preview
-        setTimeout(() => {
-            if (window.accessibilityInterface) {
-                window.accessibilityInterface.applyToPreview();
-            }
-        }, 500);
-    };
-});
-
-// Make instance globally available
-window.accessibilityInterface = null;
 document.addEventListener('DOMContentLoaded', () => {
     window.accessibilityInterface = new AccessibilityWebInterface();
 });
