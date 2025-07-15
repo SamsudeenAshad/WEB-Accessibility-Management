@@ -127,13 +127,76 @@ class AccessibilityWebInterface {
         this.currentUrl = finalUrl;
         this.updateCurrentUrl(finalUrl);
 
-        // Try to load the website
-        try {
-            this.websiteFrame.src = finalUrl;
-        } catch (error) {
-            this.updateStatus('Error loading website: ' + error.message, 'error');
-            this.showCorsModal();
-        }
+        // First try to load directly
+        this.tryDirectLoad(finalUrl);
+    }
+
+    tryDirectLoad(url) {
+        const testFrame = document.createElement('iframe');
+        testFrame.style.display = 'none';
+        testFrame.src = url;
+        
+        testFrame.onload = () => {
+            try {
+                // Test if we can access the content
+                const doc = testFrame.contentDocument || testFrame.contentWindow.document;
+                if (doc) {
+                    // Success - load in main frame
+                    this.websiteFrame.src = url;
+                    document.body.removeChild(testFrame);
+                } else {
+                    // CORS issue - try proxy
+                    this.tryProxyLoad(url);
+                    document.body.removeChild(testFrame);
+                }
+            } catch (error) {
+                // CORS issue - try proxy
+                this.tryProxyLoad(url);
+                document.body.removeChild(testFrame);
+            }
+        };
+
+        testFrame.onerror = () => {
+            // Failed to load - try proxy
+            this.tryProxyLoad(url);
+            document.body.removeChild(testFrame);
+        };
+
+        document.body.appendChild(testFrame);
+        
+        // Timeout fallback
+        setTimeout(() => {
+            if (document.body.contains(testFrame)) {
+                this.tryProxyLoad(url);
+                document.body.removeChild(testFrame);
+            }
+        }, 5000);
+    }
+
+    tryProxyLoad(url) {
+        // Try using the server's fetch API
+        const proxyUrl = `/api/fetch-website?url=${encodeURIComponent(url)}`;
+        
+        fetch(proxyUrl)
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    throw new Error('Proxy failed');
+                }
+            })
+            .then(html => {
+                // Create a blob URL for the HTML content
+                const blob = new Blob([html], { type: 'text/html' });
+                const blobUrl = URL.createObjectURL(blob);
+                this.websiteFrame.src = blobUrl;
+                this.updateStatus('Website loaded via proxy');
+            })
+            .catch(error => {
+                console.error('Proxy load failed:', error);
+                this.updateStatus('Could not load website due to CORS restrictions', 'error');
+                this.showCorsModal();
+            });
     }
 
     refreshWebsite() {
