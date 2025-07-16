@@ -15,8 +15,8 @@
         <style>
             #accessibility-widget {
                 position: fixed;
-                top: 20px;
-                right: 20px;
+                top: 80px;
+                left: 20px;
                 z-index: 999999;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             }
@@ -45,12 +45,13 @@
             #accessibility-menu {
                 position: absolute;
                 top: 70px;
-                right: 0;
+                left: 0;
                 background: white;
                 border-radius: 12px;
                 box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-                min-width: 280px;
-                max-height: 400px;
+                min-width: 320px;
+                max-width: 400px;
+                max-height: 500px;
                 overflow-y: auto;
                 display: none;
                 animation: slideIn 0.3s ease;
@@ -77,6 +78,48 @@
             
             .menu-options {
                 padding: 10px 0;
+            }
+            
+            .menu-section {
+                border-bottom: 1px solid #f0f0f0;
+                padding: 10px 0;
+            }
+            
+            .menu-section:last-child {
+                border-bottom: none;
+            }
+            
+            .section-title {
+                font-size: 14px;
+                font-weight: 600;
+                color: #2c3e50;
+                margin: 0 0 10px 20px;
+                padding: 8px 0;
+            }
+            
+            .text-size-controls {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .size-indicator {
+                background: #e3f2fd;
+                color: #1976d2;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                font-weight: 600;
+                min-width: 40px;
+                text-align: center;
+            }
+            
+            .reset-btn {
+                background: #fff3e0 !important;
+                color: #f57c00 !important;
+            }
+            
+            .reset-btn:hover {
+                background: #ffe0b2 !important;
             }
             
             .menu-option {
@@ -152,21 +195,72 @@
             }
             
             /* Accessibility modifications */
-            .accessibility-large-text * {
-                font-size: 120% !important;
+            .accessibility-text-size-1 * {
+                font-size: 102% !important;
+                line-height: 1.4 !important;
+            }
+            
+            .accessibility-text-size-2 * {
+                font-size: 104% !important;
+                line-height: 1.4 !important;
+            }
+            
+            .accessibility-text-size-3 * {
+                font-size: 106% !important;
                 line-height: 1.5 !important;
             }
             
+            .accessibility-text-size-4 * {
+                font-size: 108% !important;
+                line-height: 1.5 !important;
+            }
+            
+            .accessibility-text-size-5 * {
+                font-size: 110% !important;
+                line-height: 1.6 !important;
+            }
+            
+            .accessibility-text-size-6 * {
+                font-size: 112% !important;
+                line-height: 1.6 !important;
+            }
+            
+            .accessibility-text-size-7 * {
+                font-size: 114% !important;
+                line-height: 1.7 !important;
+            }
+            
+            .accessibility-grayscale {
+                filter: grayscale(100%) !important;
+            }
+            
             .accessibility-high-contrast {
-                filter: contrast(150%) !important;
+                filter: contrast(150%) brightness(1.2) !important;
+            }
+            
+            .accessibility-negative-contrast {
+                filter: invert(1) hue-rotate(180deg) !important;
+            }
+            
+            .accessibility-light-background * {
+                background-color: #ffffff !important;
+                color: #000000 !important;
             }
             
             .accessibility-dark-mode {
                 filter: invert(1) hue-rotate(180deg) !important;
             }
             
-            .accessibility-dyslexia-font * {
-                font-family: 'Comic Sans MS', cursive !important;
+            .accessibility-links-underline a {
+                text-decoration: underline !important;
+                text-decoration-thickness: 2px !important;
+                text-underline-offset: 2px !important;
+            }
+            
+            .accessibility-readable-font * {
+                font-family: 'Arial', 'Helvetica', sans-serif !important;
+                font-weight: 400 !important;
+                letter-spacing: 0.5px !important;
             }
             
             .accessibility-focus-indicators *:focus {
@@ -190,59 +284,132 @@
                 <h3>Accessibility Options</h3>
             </div>
             <div class="menu-options">
-                <button class="menu-option" data-feature="large-text" role="menuitem">
-                    <span class="option-icon">🔍</span>
-                    <div class="option-content">
-                        <div class="option-title">Large Text</div>
-                        <div class="option-description">Increase text size for better readability</div>
+                <!-- 📝 Text Adjustments -->
+                <div class="menu-section">
+                    <h4 class="section-title">📝 Text Adjustments</h4>
+                    <div class="text-size-controls">
+                        <button class="menu-option text-size-btn" data-action="increase-text" role="menuitem">
+                            <span class="option-icon">🔍</span>
+                            <div class="option-content">
+                                <div class="option-title">Increase Text Size</div>
+                                <div class="option-description">Make text larger for better readability</div>
+                            </div>
+                            <div class="size-indicator" id="text-size-display">100%</div>
+                        </button>
+                        <button class="menu-option text-size-btn" data-action="decrease-text" role="menuitem">
+                            <span class="option-icon">🔍</span>
+                            <div class="option-content">
+                                <div class="option-title">Decrease Text Size</div>
+                                <div class="option-description">Make text smaller</div>
+                            </div>
+                        </button>
                     </div>
-                    <div class="toggle-switch" id="toggle-large-text"></div>
-                </button>
-                
-                <button class="menu-option" data-feature="high-contrast" role="menuitem">
-                    <span class="option-icon">🎨</span>
-                    <div class="option-content">
-                        <div class="option-title">High Contrast</div>
-                        <div class="option-description">Enhance color contrast for better visibility</div>
-                    </div>
-                    <div class="toggle-switch" id="toggle-high-contrast"></div>
-                </button>
-                
-                <button class="menu-option" data-feature="dark-mode" role="menuitem">
-                    <span class="option-icon">🌙</span>
-                    <div class="option-content">
-                        <div class="option-title">Dark Mode</div>
-                        <div class="option-description">Switch to dark theme</div>
-                    </div>
-                    <div class="toggle-switch" id="toggle-dark-mode"></div>
-                </button>
-                
-                <button class="menu-option" data-feature="dyslexia-font" role="menuitem">
-                    <span class="option-icon">📖</span>
-                    <div class="option-content">
-                        <div class="option-title">Dyslexia-Friendly Font</div>
-                        <div class="option-description">Use fonts that are easier to read</div>
-                    </div>
-                    <div class="toggle-switch" id="toggle-dyslexia-font"></div>
-                </button>
-                
-                <button class="menu-option" data-feature="focus-indicators" role="menuitem">
-                    <span class="option-icon">🎯</span>
-                    <div class="option-content">
-                        <div class="option-title">Focus Indicators</div>
-                        <div class="option-description">Enhanced focus outlines for navigation</div>
-                    </div>
-                    <div class="toggle-switch" id="toggle-focus-indicators"></div>
-                </button>
-                
-                <button class="menu-option" data-feature="reduce-motion" role="menuitem">
-                    <span class="option-icon">⚡</span>
-                    <div class="option-content">
-                        <div class="option-title">Reduce Motion</div>
-                        <div class="option-description">Minimize animations and transitions</div>
-                    </div>
-                    <div class="toggle-switch" id="toggle-reduce-motion"></div>
-                </button>
+                </div>
+
+                <!-- 🎨 Visual Enhancements -->
+                <div class="menu-section">
+                    <h4 class="section-title">🎨 Visual Enhancements</h4>
+                    <button class="menu-option" data-feature="grayscale" role="menuitem">
+                        <span class="option-icon">⚫</span>
+                        <div class="option-content">
+                            <div class="option-title">Grayscale Mode</div>
+                            <div class="option-description">Convert pages to grayscale for better focus</div>
+                        </div>
+                        <div class="toggle-switch" id="toggle-grayscale"></div>
+                    </button>
+                    
+                    <button class="menu-option" data-feature="high-contrast" role="menuitem">
+                        <span class="option-icon">🎨</span>
+                        <div class="option-content">
+                            <div class="option-title">High Contrast</div>
+                            <div class="option-description">Enhance contrast for better visibility</div>
+                        </div>
+                        <div class="toggle-switch" id="toggle-high-contrast"></div>
+                    </button>
+                    
+                    <button class="menu-option" data-feature="negative-contrast" role="menuitem">
+                        <span class="option-icon">🔄</span>
+                        <div class="option-content">
+                            <div class="option-title">Negative Contrast</div>
+                            <div class="option-description">Invert colors for reduced eye strain</div>
+                        </div>
+                        <div class="toggle-switch" id="toggle-negative-contrast"></div>
+                    </button>
+                    
+                    <button class="menu-option" data-feature="light-background" role="menuitem">
+                        <span class="option-icon">☀️</span>
+                        <div class="option-content">
+                            <div class="option-title">Light Background</div>
+                            <div class="option-description">Force light backgrounds for better readability</div>
+                        </div>
+                        <div class="toggle-switch" id="toggle-light-background"></div>
+                    </button>
+                    
+                    <button class="menu-option" data-feature="dark-mode" role="menuitem">
+                        <span class="option-icon">🌙</span>
+                        <div class="option-content">
+                            <div class="option-title">Dark Mode</div>
+                            <div class="option-description">Apply dark theme for reduced eye strain</div>
+                        </div>
+                        <div class="toggle-switch" id="toggle-dark-mode"></div>
+                    </button>
+                </div>
+
+                <!-- 🔗 Link Enhancements -->
+                <div class="menu-section">
+                    <h4 class="section-title">🔗 Link Enhancements</h4>
+                    <button class="menu-option" data-feature="links-underline" role="menuitem">
+                        <span class="option-icon">�</span>
+                        <div class="option-content">
+                            <div class="option-title">Links Underline</div>
+                            <div class="option-description">Make all links clearly underlined</div>
+                        </div>
+                        <div class="toggle-switch" id="toggle-links-underline"></div>
+                    </button>
+                </div>
+
+                <!-- 📖 Typography -->
+                <div class="menu-section">
+                    <h4 class="section-title">📖 Typography</h4>
+                    <button class="menu-option" data-feature="readable-font" role="menuitem">
+                        <span class="option-icon">📖</span>
+                        <div class="option-content">
+                            <div class="option-title">Readable Font</div>
+                            <div class="option-description">Apply clean, readable fonts across pages</div>
+                        </div>
+                        <div class="toggle-switch" id="toggle-readable-font"></div>
+                    </button>
+                    
+                    <button class="menu-option" data-feature="focus-indicators" role="menuitem">
+                        <span class="option-icon">🎯</span>
+                        <div class="option-content">
+                            <div class="option-title">Focus Indicators</div>
+                            <div class="option-description">Enhanced focus outlines for navigation</div>
+                        </div>
+                        <div class="toggle-switch" id="toggle-focus-indicators"></div>
+                    </button>
+                    
+                    <button class="menu-option" data-feature="reduce-motion" role="menuitem">
+                        <span class="option-icon">⚡</span>
+                        <div class="option-content">
+                            <div class="option-title">Reduce Motion</div>
+                            <div class="option-description">Minimize animations and transitions</div>
+                        </div>
+                        <div class="toggle-switch" id="toggle-reduce-motion"></div>
+                    </button>
+                </div>
+
+                <!-- 🔄 Reset Function -->
+                <div class="menu-section">
+                    <h4 class="section-title">🔄 Reset Function</h4>
+                    <button class="menu-option reset-btn" data-action="reset-all" role="menuitem">
+                        <span class="option-icon">🔄</span>
+                        <div class="option-content">
+                            <div class="option-title">Reset All</div>
+                            <div class="option-description">Quickly return to default settings</div>
+                        </div>
+                    </button>
+                </div>
             </div>
         </div>
     `;
@@ -257,10 +424,14 @@
     
     // State management
     const accessibilityState = {
-        'large-text': false,
+        'textSize': 0,
+        'grayscale': false,
         'high-contrast': false,
+        'negative-contrast': false,
+        'light-background': false,
         'dark-mode': false,
-        'dyslexia-font': false,
+        'links-underline': false,
+        'readable-font': false,
         'focus-indicators': false,
         'reduce-motion': false
     };
@@ -282,20 +453,109 @@
     menuOptions.forEach(option => {
         option.addEventListener('click', (e) => {
             e.preventDefault();
+            
             const feature = option.dataset.feature;
-            const toggle = document.getElementById(`toggle-${feature}`);
+            const action = option.dataset.action;
             
-            // Toggle state
-            accessibilityState[feature] = !accessibilityState[feature];
-            
-            // Update UI
-            toggle.classList.toggle('active', accessibilityState[feature]);
-            option.classList.toggle('active', accessibilityState[feature]);
-            
-            // Apply accessibility feature
-            applyAccessibilityFeature(feature, accessibilityState[feature]);
+            if (feature) {
+                // Handle feature toggle
+                const toggle = document.getElementById(`toggle-${feature}`);
+                
+                // Toggle state
+                accessibilityState[feature] = !accessibilityState[feature];
+                
+                // Update UI
+                toggle.classList.toggle('active', accessibilityState[feature]);
+                option.classList.toggle('active', accessibilityState[feature]);
+                
+                // Apply accessibility feature
+                applyAccessibilityFeature(feature, accessibilityState[feature]);
+                
+            } else if (action) {
+                // Handle action button
+                executeAction(action);
+            }
         });
     });
+    
+    // Execute action functions
+    function executeAction(action) {
+        switch (action) {
+            case 'increase-text':
+                if (accessibilityState.textSize < 7) {
+                    accessibilityState.textSize++;
+                    updateTextSize();
+                }
+                break;
+            case 'decrease-text':
+                if (accessibilityState.textSize > 0) {
+                    accessibilityState.textSize--;
+                    updateTextSize();
+                }
+                break;
+            case 'reset-all':
+                resetAllSettings();
+                break;
+        }
+    }
+    
+    // Update text size
+    function updateTextSize() {
+        const body = document.body;
+        
+        // Remove all text size classes
+        for (let i = 0; i <= 7; i++) {
+            body.classList.remove(`accessibility-text-size-${i}`);
+        }
+        
+        // Apply current text size
+        if (accessibilityState.textSize > 0) {
+            body.classList.add(`accessibility-text-size-${accessibilityState.textSize}`);
+        }
+        
+        // Update display
+        const display = document.getElementById('text-size-display');
+        if (display) {
+            display.textContent = `${100 + (accessibilityState.textSize * 2)}%`;
+        }
+        
+        // Save state
+        localStorage.setItem('accessibility-state', JSON.stringify(accessibilityState));
+    }
+    
+    // Reset all settings
+    function resetAllSettings() {
+        const body = document.body;
+        
+        // Reset text size
+        accessibilityState.textSize = 0;
+        for (let i = 0; i <= 7; i++) {
+            body.classList.remove(`accessibility-text-size-${i}`);
+        }
+        
+        // Reset all other features
+        Object.keys(accessibilityState).forEach(feature => {
+            if (feature !== 'textSize') {
+                accessibilityState[feature] = false;
+                body.classList.remove(`accessibility-${feature}`);
+                
+                // Update UI
+                const toggle = document.getElementById(`toggle-${feature}`);
+                const option = document.querySelector(`[data-feature="${feature}"]`);
+                if (toggle) toggle.classList.remove('active');
+                if (option) option.classList.remove('active');
+            }
+        });
+        
+        // Update text size display
+        const display = document.getElementById('text-size-display');
+        if (display) {
+            display.textContent = '100%';
+        }
+        
+        // Clear localStorage
+        localStorage.removeItem('accessibility-state');
+    }
     
     // Apply accessibility features to the page
     function applyAccessibilityFeature(feature, enabled) {
@@ -317,14 +577,22 @@
         const savedState = localStorage.getItem('accessibility-state');
         if (savedState) {
             const state = JSON.parse(savedState);
+            
+            // Load text size
+            if (state.textSize && state.textSize > 0) {
+                accessibilityState.textSize = state.textSize;
+                updateTextSize();
+            }
+            
+            // Load other features
             Object.keys(state).forEach(feature => {
-                if (state[feature]) {
+                if (feature !== 'textSize' && state[feature]) {
                     const toggle = document.getElementById(`toggle-${feature}`);
                     const option = document.querySelector(`[data-feature="${feature}"]`);
                     
                     accessibilityState[feature] = true;
-                    toggle.classList.add('active');
-                    option.classList.add('active');
+                    if (toggle) toggle.classList.add('active');
+                    if (option) option.classList.add('active');
                     applyAccessibilityFeature(feature, true);
                 }
             });
