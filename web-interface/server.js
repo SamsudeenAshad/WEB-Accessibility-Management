@@ -2,6 +2,8 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const fetch = require('node-fetch');
+const fs = require('fs');
 const app = express();
 
 // Middleware
@@ -14,8 +16,74 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Demo page with accessibility widget pre-injected
 app.get('/demo', (req, res) => {
-    res.sendFile(path.join(__dirname, 'demo.html'));
+    const demoPath = path.join(__dirname, 'demo.html');
+    let html = fs.readFileSync(demoPath, 'utf8');
+    
+    // Inject accessibility widget
+    const widgetScript = `
+        <script>
+            (function() {
+                const script = document.createElement('script');
+                script.src = '${req.protocol}://${req.get('host')}/accessibility-widget.js';
+                script.onload = function() {
+                    console.log('♿ Accessibility widget loaded successfully on demo page!');
+                };
+                document.head.appendChild(script);
+            })();
+        </script>
+    `;
+    
+    html = html.replace('</head>', widgetScript + '</head>');
+    
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+});
+
+// Serve the accessibility widget script
+app.get('/accessibility-widget.js', (req, res) => {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.sendFile(path.join(__dirname, 'accessibility-widget.js'));
+});
+
+// API endpoint to inject accessibility tool
+app.post('/api/inject-accessibility', async (req, res) => {
+    try {
+        const { targetUrl } = req.body;
+        
+        if (!targetUrl) {
+            return res.status(400).json({ error: 'Target URL is required' });
+        }
+        
+        // Validate URL format
+        try {
+            new URL(targetUrl);
+        } catch (e) {
+            return res.status(400).json({ error: 'Invalid URL format' });
+        }
+        
+        // Store the injection request (in a real app, you'd use a database)
+        console.log(`📝 Injection request for: ${targetUrl}`);
+        console.log(`🔗 Widget will be available at: ${req.protocol}://${req.get('host')}/accessibility-widget.js`);
+        
+        // Return success response with injection instructions
+        res.json({
+            success: true,
+            message: 'Accessibility tool injection initiated',
+            targetUrl,
+            widgetUrl: `${req.protocol}://${req.get('host')}/accessibility-widget.js`,
+            instructions: [
+                'Copy the widget URL above',
+                'Add it as a script tag to your target website',
+                'The accessibility icon will appear in the top-right corner'
+            ]
+        });
+        
+    } catch (error) {
+        console.error('Error injecting accessibility tool:', error);
+        res.status(500).json({ error: 'Failed to inject accessibility tool' });
+    }
 });
 
 // CORS proxy endpoint for loading external websites
@@ -63,14 +131,30 @@ app.get('/api/fetch-website', async (req, res) => {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const html = await response.text();
+        let html = await response.text();
         
         // Inject base tag to resolve relative URLs
         const baseTag = `<base href="${url}">`;
-        const modifiedHtml = html.replace('<head>', `<head>${baseTag}`);
+        html = html.replace('<head>', `<head>${baseTag}`);
+        
+        // Inject accessibility widget
+        const widgetScript = `
+            <script>
+                (function() {
+                    const script = document.createElement('script');
+                    script.src = '${req.protocol}://${req.get('host')}/accessibility-widget.js';
+                    script.onload = function() {
+                        console.log('♿ Accessibility widget loaded successfully!');
+                    };
+                    document.head.appendChild(script);
+                })();
+            </script>
+        `;
+        
+        html = html.replace('</head>', widgetScript + '</head>');
         
         res.setHeader('Content-Type', 'text/html');
-        res.send(modifiedHtml);
+        res.send(html);
     } catch (error) {
         console.error('Error fetching website:', error);
         res.status(500).json({ error: 'Failed to fetch website: ' + error.message });
@@ -116,10 +200,16 @@ app.use((err, req, res, next) => {
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`🌐 Deep Accessibility Tool Web Interface running on http://localhost:${PORT}`);
-    console.log(`📱 Demo page available at http://localhost:${PORT}/demo`);
-    console.log(`🎯 Load any website and apply accessibility effects directly`);
-    console.log(`🔧 Use /api/fetch-website?url=<website-url> to bypass CORS`);
+    console.log(`\n🚀 Web Accessibility Management Tool started successfully!\n`);
+    console.log(`📱 Control Panel: http://localhost:${PORT}`);
+    console.log(`� Widget Script: http://localhost:${PORT}/accessibility-widget.js`);
+    console.log(`🛠️  API Endpoint: http://localhost:${PORT}/api/fetch-website?url=<target-url>`);
+    console.log(`\n📋 How to use:`);
+    console.log(`1. Open the control panel at http://localhost:${PORT}`);
+    console.log(`2. Enter the target website URL or localhost port`);
+    console.log(`3. Click "Inject Accessibility Tool"`);
+    console.log(`4. The ♿ icon will appear on the target website`);
+    console.log(`5. Click the icon to access accessibility features\n`);
 });
 
 module.exports = app;

@@ -129,7 +129,7 @@ npm install
 npm run dev  # Uses nodemon for auto-restart
 ```
 
-## 🌐 Browser Support
+## ♿ Browser Support
 
 - Chrome (recommended)
 - Firefox

@@ -3,184 +3,230 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deep Accessibility Tool - Web Interface</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Web Accessibility Management Tool</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+        }
+        
+        input[type="url"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="url"]:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .inject-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+        
+        .inject-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+        
+        .inject-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .features-preview {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            text-align: left;
+        }
+        
+        .features-preview h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            color: #34495e;
+        }
+        
+        .feature-icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <header class="header">
-            <h1><i class="fas fa-universal-access"></i> Deep Accessibility Tool</h1>
-            <p>Enter any website URL and apply accessibility effects directly</p>
-            <div class="target-url-section">
-                <input type="url" id="targetUrl" placeholder="Enter website URL (e.g., https://example.com)" value="https://example.com">
-                <button id="loadWebsite" class="btn-primary">Load Website</button>
+        <h1>♿ Web Accessibility Tool</h1>
+        <p class="subtitle">Inject accessibility features into any website</p>
+        
+        <form id="injectForm">
+            <div class="form-group">
+                <label for="targetUrl">Target Website URL or Port:</label>
+                <input type="url" id="targetUrl" placeholder="http://localhost:3000 or https://example.com" required>
             </div>
-        </header>
-
-        <div class="features-grid">
-            <!-- Text Size Controls -->
-            <div class="feature-section">
-                <h2><i class="fas fa-font"></i> Text Size</h2>
-                <div class="feature-icons">
-                    <div class="icon-item" data-action="increaseText">
-                        <div class="icon-circle">
-                            <i class="fas fa-plus"></i>
-                            <i class="fas fa-font"></i>
-                        </div>
-                        <span>Increase Text</span>
-                    </div>
-                    <div class="icon-item" data-action="decreaseText">
-                        <div class="icon-circle">
-                            <i class="fas fa-minus"></i>
-                            <i class="fas fa-font"></i>
-                        </div>
-                        <span>Decrease Text</span>
-                    </div>
-                </div>
+            
+            <button type="submit" class="inject-btn" id="injectBtn">
+                🚀 Inject Accessibility Tool
+            </button>
+        </form>
+        
+        <div id="status" class="status"></div>
+        
+        <div class="features-preview">
+            <h3>Available Accessibility Features:</h3>
+            <div class="feature-item">
+                <span class="feature-icon">🔍</span>
+                <span>Text Size Adjustment</span>
             </div>
-
-            <!-- Visual Effects -->
-            <div class="feature-section">
-                <h2><i class="fas fa-eye"></i> Visual Effects</h2>
-                <div class="feature-icons">
-                    <div class="icon-item" data-feature="grayscale">
-                        <div class="icon-circle grayscale">
-                            <i class="fas fa-palette"></i>
-                        </div>
-                        <span>Grayscale</span>
-                    </div>
-                    <div class="icon-item" data-feature="highContrast">
-                        <div class="icon-circle high-contrast">
-                            <i class="fas fa-adjust"></i>
-                        </div>
-                        <span>High Contrast</span>
-                    </div>
-                    <div class="icon-item" data-feature="negativeContrast">
-                        <div class="icon-circle negative">
-                            <i class="fas fa-circle-half-stroke"></i>
-                        </div>
-                        <span>Negative Contrast</span>
-                    </div>
-                </div>
+            <div class="feature-item">
+                <span class="feature-icon">🎨</span>
+                <span>High Contrast Mode</span>
             </div>
-
-            <!-- Theme Options -->
-            <div class="feature-section">
-                <h2><i class="fas fa-moon"></i> Theme</h2>
-                <div class="feature-icons">
-                    <div class="icon-item" data-feature="lightBackground">
-                        <div class="icon-circle light-theme">
-                            <i class="fas fa-sun"></i>
-                        </div>
-                        <span>Light Background</span>
-                    </div>
-                    <div class="icon-item" data-feature="darkMode">
-                        <div class="icon-circle dark-theme">
-                            <i class="fas fa-moon"></i>
-                        </div>
-                        <span>Dark Mode</span>
-                    </div>
-                </div>
+            <div class="feature-item">
+                <span class="feature-icon">🌙</span>
+                <span>Dark Mode Toggle</span>
             </div>
-
-            <!-- Link Enhancement -->
-            <div class="feature-section">
-                <h2><i class="fas fa-link"></i> Links</h2>
-                <div class="feature-icons">
-                    <div class="icon-item" data-feature="linksUnderline">
-                        <div class="icon-circle">
-                            <i class="fas fa-underline"></i>
-                        </div>
-                        <span>Links Underline</span>
-                    </div>
-                </div>
+            <div class="feature-item">
+                <span class="feature-icon">📖</span>
+                <span>Dyslexia-Friendly Font</span>
             </div>
-
-            <!-- Typography -->
-            <div class="feature-section">
-                <h2><i class="fas fa-font"></i> Typography</h2>
-                <div class="feature-icons">
-                    <div class="icon-item" data-feature="readableFont">
-                        <div class="icon-circle">
-                            <i class="fas fa-book-open"></i>
-                        </div>
-                        <span>Readable Font</span>
-                    </div>
-                </div>
+            <div class="feature-item">
+                <span class="feature-icon">🎯</span>
+                <span>Focus Indicators</span>
             </div>
-
-            <!-- Reset -->
-            <div class="feature-section">
-                <h2><i class="fas fa-redo"></i> Reset</h2>
-                <div class="feature-icons">
-                    <div class="icon-item" data-action="reset">
-                        <div class="icon-circle reset">
-                            <i class="fas fa-undo"></i>
-                        </div>
-                        <span>Reset All</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Website Display Section -->
-        <div class="website-section">
-            <h2><i class="fas fa-globe"></i> Website Display</h2>
-            <div class="website-controls">
-                <button id="refreshWebsite" class="btn-secondary">
-                    <i class="fas fa-sync"></i> Refresh
-                </button>
-                <button id="openInNewTab" class="btn-secondary">
-                    <i class="fas fa-external-link-alt"></i> Open in New Tab
-                </button>
-            </div>
-            <div class="website-display">
-                <iframe id="websiteFrame" src="demo.html" width="100%" height="600"></iframe>
-            </div>
-        </div>
-
-        <!-- Status Display -->
-        <div class="status-bar">
-            <div class="status-item">
-                <i class="fas fa-circle" id="statusIcon"></i>
-                <span id="statusText">Ready to load website and apply accessibility effects</span>
-            </div>
-            <div class="active-features">
-                <span>Active Effects: </span>
-                <span id="activeFeaturesList">None</span>
-            </div>
-            <div class="current-url">
-                <span>Current URL: </span>
-                <span id="currentUrlDisplay">demo.html</span>
+            <div class="feature-item">
+                <span class="feature-icon">⚡</span>
+                <span>Reduce Motion</span>
             </div>
         </div>
     </div>
 
-    <!-- Modal for CORS information -->
-    <div id="corsModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Website Loading Information</h2>
-            <p>Some websites may not load due to CORS (Cross-Origin Resource Sharing) policies. This is a security feature of web browsers.</p>
-            <h3>Websites that typically work:</h3>
-            <ul>
-                <li>Static websites and blogs</li>
-                <li>News websites</li>
-                <li>Documentation sites</li>
-                <li>Educational websites</li>
-            </ul>
-            <h3>Websites that may not work:</h3>
-            <ul>
-                <li>Social media platforms (Facebook, Twitter, etc.)</li>
-                <li>Banking websites</li>
-                <li>Sites with strict security policies</li>
-            </ul>
-            <p><strong>Tip:</strong> Try adding a CORS proxy like <code>https://cors-anywhere.herokuapp.com/</code> before the URL.</p>
-            <button id="closeCorsModal" class="btn-primary">Got it!</button>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
+    <script>
+        document.getElementById('injectForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const targetUrl = document.getElementById('targetUrl').value;
+            const injectBtn = document.getElementById('injectBtn');
+            const status = document.getElementById('status');
+            
+            // Disable button and show loading state
+            injectBtn.disabled = true;
+            injectBtn.textContent = '🔄 Injecting...';
+            
+            try {
+                const response = await fetch('/api/inject-accessibility', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ targetUrl })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    status.className = 'status success';
+                    status.style.display = 'block';
+                    status.innerHTML = `
+                        <strong>✅ Success!</strong><br>
+                        Accessibility tool injected into: <strong>${targetUrl}</strong><br>
+                        Look for the ♿ icon in the top-right corner of the target website.
+                    `;
+                } else {
+                    throw new Error(result.error || 'Failed to inject accessibility tool');
+                }
+            } catch (error) {
+                status.className = 'status error';
+                status.style.display = 'block';
+                status.innerHTML = `
+                    <strong>❌ Error:</strong><br>
+                    ${error.message}
+                `;
+            } finally {
+                // Reset button
+                injectBtn.disabled = false;
+                injectBtn.textContent = '🚀 Inject Accessibility Tool';
+            }
+        });
+    </script>
 </body>
 </html>
