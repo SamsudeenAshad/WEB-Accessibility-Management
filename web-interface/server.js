@@ -204,12 +204,6 @@ app.listen(PORT, () => {
     console.log(`📱 Control Panel: http://localhost:${PORT}`);
     console.log(`� Widget Script: http://localhost:${PORT}/accessibility-widget.js`);
     console.log(`🛠️  API Endpoint: http://localhost:${PORT}/api/fetch-website?url=<target-url>`);
-    console.log(`\n📋 How to use:`);
-    console.log(`1. Open the control panel at http://localhost:${PORT}`);
-    console.log(`2. Enter the target website URL or localhost port`);
-    console.log(`3. Click "Inject Accessibility Tool"`);
-    console.log(`4. The ♿ icon will appear on the target website`);
-    console.log(`5. Click the icon to access accessibility features\n`);
 });
 
 module.exports = app;
